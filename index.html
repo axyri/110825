@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>준비물 알리미</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        /* 요일 선택 버튼 */
+        .day-select {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .day-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            background: var(--card-bg);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .day-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* 섹션 제목 및 버튼 그룹 */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .edit-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .add-period-btn {
+            background: #e0e7ff;
+            color: var(--primary);
+            border: 1px solid #c7d2fe;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .add-period-btn:hover {
+            background: #c7d2fe;
+        }
+
+        /* 세로형 시간표 (1교시 밑에 과목) */
+        table.vertical-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table.vertical-table th, table.vertical-table td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: center;
+        }
+
+        table.vertical-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        table.vertical-table td {
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: #ffffff;
+        }
+
+        .subject-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        table.vertical-table td input {
+            width: 80%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .del-period-btn {
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* 입력 그룹 & 리스트 */
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .add-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .custom-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .custom-list li {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            margin-bottom: 8px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .custom-list li .left-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-list input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .delete-btn:hover {
+            background: #fca5a5;
+            color: white;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎒 준비물 & 수행평가 알리미</h1>
+    
+    <!-- 요일 선택 -->
+    <div class="day-select">
+        <button class="day-btn active" onclick="switchDay('mon')">월</button>
+        <button class="day-btn" onclick="switchDay('tue')">화</button>
+        <button class="day-btn" onclick="switchDay('wed')">수</button>
+        <button class="day-btn" onclick="switchDay('thu')">목</button>
+        <button class="day-btn" onclick="switchDay('fri')">금</button>
+    </div>
+
+    <!-- 세로형 시간표 (1교시 밑 과목) -->
+    <div class="section-header">
+        <div class="section-title">오늘의 시간표</div>
+        <div class="btn-group">
+            <button class="add-period-btn" id="add-period-btn" onclick="addPeriod()" style="display:none;">+ 교시 추가</button>
+            <button class="edit-btn" id="schedule-edit-btn" onclick="toggleScheduleEdit()">시간표 수정</button>
+        </div>
+    </div>
+    
+    <table class="vertical-table">
+        <tbody id="timetable-body">
+            <!-- 자바스크립트로 1교시 / 과목 세로 배치 -->
+        </tbody>
+    </table>
+
+    <!-- 준비물 리스트 -->
+    <div class="section-header">
+        <div class="section-title">챙겨야 할 준비물</div>
+    </div>
+    <div class="input-group">
+        <input type="text" id="item-input" placeholder="새 준비물 입력 (예: 미술 붓 세트)" onkeyup="if(event.key==='Enter') addItem()">
+        <button class="add-btn" onclick="addItem()">추가</button>
+    </div>
+    <ul class="custom-list" id="supplies-list"></ul>
+
+    <!-- 수행평가 리스트 -->
+    <div class="section-header">
+        <div class="section-title">📝 수행평가 일정</div>
+    </div>
+    <div class="input-group">
+        <input type="text" id="eval-input" placeholder="수행평가 내용 및 마감일 입력 (예: 역사 발표 PPT)" onkeyup="if(event.key==='Enter') addEval()">
+        <button class="add-btn" onclick="addEval()">추가</button>
+    </div>
+    <ul class="custom-list" id="eval-list"></ul>
+</div>
+
+<script>
+    // 요일별 초기 기본 시간표
+    const defaultSchedules = {
+        mon: ["영어", "가정", "국어", "창체", "체육", "과학"],
+        tue: ["체육", "역사", "영어", "수학", "과학", "국어", "기술"],
+        wed: ["국어", "수학", "한문", "과학", "사회", "스클", "과학"],
+        thu: ["미술", "미술", "체육", "국어", "영어", "수학"],
+        fri: ["기술", "사회", "과학", "영어", "역사", "한문"]
+    };
+
+    let currentDay = 'mon';
+    let isEditingSchedule = false;
+
+    // LocalStorage 불러오기 또는 초기화
+    let appData = JSON.parse(localStorage.getItem('notifier_data')) || {
+        schedules: defaultSchedules,
+        items: { mon: [], tue: [], wed: [], thu: [], fri: [] },
+        evals: { mon: [], tue: [], wed: [], thu: [], fri: [] }
+    };
+
+    function saveData() {
+        localStorage.setItem('notifier_data', JSON.stringify(appData));
+    }
+
+    // 요일 변경
+    function switchDay(day) {
+        currentDay = day;
+        isEditingSchedule = false;
+        document.getElementById('schedule-edit-btn').innerText = '시간표 수정';
+        document.getElementById('add-period-btn').style.display = 'none';
+
+        document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        renderSchedule();
+        renderSupplies();
+        renderEvals();
+    }
+
+    // 세로형 시간표 렌더링 (1교시 헤더 밑에 과목 셀 배치)
+    function renderSchedule() {
+        const tbody = document.getElementById('timetable-body');
+        const subjects = appData.schedules[currentDay] || [];
+        
+        let html = '';
+        subjects.forEach((subject, i) => {
+            html += `
+                <tr>
+                    <th>${i + 1}교시</th>
+                </tr>
+                <tr>
+                    <td>
+                        ${isEditingSchedule 
+                            ? `<div class="subject-cell">
+                                 <input type="text" value="${subject}" onchange="updateSubject(${i}, this.value)">
+                                 <button class="del-period-btn" onclick="deletePeriod(${i})">삭제</button>
+                               </div>`
+                            : (subject || '<span style="color:#cbd5e1;">-</span>')}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    // 시간표 수정 모드 토글
+    function toggleScheduleEdit() {
+        isEditingSchedule = !isEditingSchedule;
+        document.getElementById('schedule-edit-btn').innerText = isEditingSchedule ? '저장 완료' : '시간표 수정';
+        document.getElementById('add-period-btn').style.display = isEditingSchedule ? 'inline-block' : 'none';
+        renderSchedule();
+    }
+
+    // 과목명 변경
+    function updateSubject(index, value) {
+        appData.schedules[currentDay][index] = value;
+        saveData();
+    }
+
+    // 교시 추가
+    function addPeriod() {
+        if (!appData.schedules[currentDay]) {
+            appData.schedules[currentDay] = [];
+        }
+        appData.schedules[currentDay].push("새 과목");
+        saveData();
+        renderSchedule();
+    }
+
+    // 교시 삭제
+    function deletePeriod(index) {
+        appData.schedules[currentDay].splice(index, 1);
+        saveData();
+        renderSchedule();
+    }
+
+    // --- 준비물 관리 ---
+    function renderSupplies() {
+        const listEl = document.getElementById('supplies-list');
+        const items = appData.items[currentDay] || [];
+
+        listEl.innerHTML = items.map((item, idx) => `
+            <li>
+                <div class="left-content">
+                    <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleItem(${idx})">
+                    <span class="${item.done ? 'completed' : ''}">${item.text}</span>
+                </div>
+                <button class="delete-btn" onclick="deleteItem(${idx})">삭제</button>
+            </li>
+        `).join('');
+    }
+
+    function addItem() {
+        const input = document.getElementById('item-input');
+        if (!input.value.trim()) return;
+
+        if (!appData.items[currentDay]) appData.items[currentDay] = [];
+        appData.items[currentDay].push({ text: input.value.trim(), done: false });
+        input.value = '';
+        saveData();
+        renderSupplies();
+    }
+
+    function toggleItem(index) {
+        appData.items[currentDay][index].done = !appData.items[currentDay][index].done;
+        saveData();
+        renderSupplies();
+    }
+
+    function deleteItem(index) {
+        appData.items[currentDay].splice(index, 1);
+        saveData();
+        renderSupplies();
+    }
+
+    // --- 수행평가 관리 ---
+    function renderEvals() {
+        const listEl = document.getElementById('eval-list');
+        const evals = appData.evals[currentDay] || [];
+
+        listEl.innerHTML = evals.map((item, idx) => `
+            <li>
+                <div class="left-content">
+                    <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleEval(${idx})">
+                    <span class="${item.done ? 'completed' : ''}">${item.text}</span>
+                </div>
+                <button class="delete-btn" onclick="deleteEval(${idx})">삭제</button>
+            </li>
+        `).join('');
+    }
+
+    function addEval() {
+        const input = document.getElementById('eval-input');
+        if (!input.value.trim()) return;
+
+        if (!appData.evals[currentDay]) appData.evals[currentDay] = [];
+        appData.evals[currentDay].push({ text: input.value.trim(), done: false });
+        input.value = '';
+        saveData();
+        renderEvals();
+    }
+
+    function toggleEval(index) {
+        appData.evals[currentDay][index].done = !appData.evals[currentDay][index].done;
+        saveData();
+        renderEvals();
+    }
+
+    function deleteEval(index) {
+        appData.evals[currentDay].splice(index, 1);
+        saveData();
+        renderEvals();
+    }
+
+    // 초기 화면 로드
+    renderSchedule();
+    renderSupplies();
+    renderEvals();
+</script>
+
+</body>
+</html>
